@@ -1,0 +1,27 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Aphelion", "src\Aphelion\Aphelion.csproj", "{28903C5B-04DA-4719-A29A-3B105C6AADCC}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{EE94C18D-EA68-4285-83A7-47CF36D63742}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Aphelion.Tests", "tests\Aphelion.Tests\Aphelion.Tests.csproj", "{2339E15E-87F9-47B4-A25C-E88A6D54E24C}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{28903C5B-04DA-4719-A29A-3B105C6AADCC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{28903C5B-04DA-4719-A29A-3B105C6AADCC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{28903C5B-04DA-4719-A29A-3B105C6AADCC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{28903C5B-04DA-4719-A29A-3B105C6AADCC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2339E15E-87F9-47B4-A25C-E88A6D54E24C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2339E15E-87F9-47B4-A25C-E88A6D54E24C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2339E15E-87F9-47B4-A25C-E88A6D54E24C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2339E15E-87F9-47B4-A25C-E88A6D54E24C}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{2339E15E-87F9-47B4-A25C-E88A6D54E24C} = {EE94C18D-EA68-4285-83A7-47CF36D63742}
+	EndGlobalSection
+EndGlobal
