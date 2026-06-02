@@ -14,14 +14,16 @@ internal struct ComponentCacheEvent
     internal ComponentCacheEventType EventType;
 }
 
-internal static class ComponentCache
+internal class ComponentCache
 {
-    private static readonly List<BaseComponent> _components = new();
-    private static readonly List<ComponentCacheEvent> _unitializedComponents = new();
+    internal static ThreadLocal<ComponentCache> Instance = new (() => new ComponentCache());
+    
+    private readonly List<BaseComponent> _components = new();
+    private readonly List<ComponentCacheEvent> _unitializedComponents = new();
 
-    internal static IReadOnlyList<BaseComponent> Components => _components;
+    internal IReadOnlyList<BaseComponent> Components => _components;
 
-    internal static void Register(BaseComponent baseComponent)
+    internal void Register(BaseComponent baseComponent)
     {
         _unitializedComponents.Add(new ComponentCacheEvent
         {
@@ -30,7 +32,7 @@ internal static class ComponentCache
         });
     }
 
-    internal static void Unregister(BaseComponent baseComponent)
+    internal void Unregister(BaseComponent baseComponent)
     {
         _unitializedComponents.Add(new ComponentCacheEvent
         {
@@ -39,7 +41,7 @@ internal static class ComponentCache
         });
     }
 
-    internal static void Update()
+    internal void Update()
     {
         foreach (var @event in _unitializedComponents)
             if (ComponentCacheEventType.Added == @event.EventType)
@@ -56,7 +58,7 @@ internal static class ComponentCache
         _unitializedComponents.Clear();
     }
 
-    internal static void Clear()
+    internal void Clear()
     {
         _components.Clear();
         _unitializedComponents.Clear();

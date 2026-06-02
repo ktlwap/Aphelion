@@ -14,14 +14,16 @@ internal struct GameObjectCacheEvent
     internal GameObjectCacheEventType EventType;
 }
 
-internal static class GameObjectCache
+internal class GameObjectCache
 {
-    private static readonly List<GameObject> _gameObjects = new();
-    private static readonly List<GameObjectCacheEvent> _unitializedGameObjects = new();
+    internal static ThreadLocal<GameObjectCache> Instance = new (() => new GameObjectCache());
+    
+    private readonly List<GameObject> _gameObjects = new();
+    private readonly List<GameObjectCacheEvent> _unitializedGameObjects = new();
 
-    internal static IReadOnlyList<GameObject> GameObjects => _gameObjects;
+    internal IReadOnlyList<GameObject> GameObjects => _gameObjects;
 
-    internal static void Register(GameObject gameObject)
+    internal void Register(GameObject gameObject)
     {
         _unitializedGameObjects.Add(new GameObjectCacheEvent
         {
@@ -30,7 +32,7 @@ internal static class GameObjectCache
         });
     }
 
-    internal static void Unregister(GameObject gameObject)
+    internal void Unregister(GameObject gameObject)
     {
         _unitializedGameObjects.Add(new GameObjectCacheEvent
         {
@@ -39,12 +41,12 @@ internal static class GameObjectCache
         });
     }
 
-    internal static bool IsNameAlreadyInUse(string name)
+    internal bool IsNameAlreadyInUse(string name)
     {
         return _gameObjects.Any(go => go.Name == name);
     }
 
-    internal static void Update()
+    internal void Update()
     {
         var events = _unitializedGameObjects.ToArray();
         _unitializedGameObjects.Clear();
@@ -56,7 +58,7 @@ internal static class GameObjectCache
                 _gameObjects.Remove(@event.GameObject);
     }
 
-    internal static void Clear()
+    internal void Clear()
     {
         _gameObjects.Clear();
         _unitializedGameObjects.Clear();

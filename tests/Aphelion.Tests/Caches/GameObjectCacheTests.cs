@@ -8,12 +8,12 @@ public class GameObjectCacheTests : IDisposable
 {
     public GameObjectCacheTests()
     {
-        GameObjectCache.Clear();
+        GameObjectCache.Instance.Value!.Clear();
     }
 
     public void Dispose()
     {
-        GameObjectCache.Clear();
+        GameObjectCache.Instance.Value!.Clear();
     }
 
     [Fact]
@@ -21,23 +21,23 @@ public class GameObjectCacheTests : IDisposable
     {
         var go = GameObject.Instantiate("Test");
 
-        GameObjectCache.Update();
+        GameObjectCache.Instance.Value!.Update();
 
-        Assert.Single(GameObjectCache.GameObjects);
-        Assert.Contains(go, GameObjectCache.GameObjects);
+        Assert.Single(GameObjectCache.Instance.Value!.GameObjects);
+        Assert.Contains(go, GameObjectCache.Instance.Value!.GameObjects);
     }
 
     [Fact]
     public void Unregister_RemovesGameObjectAfterUpdate()
     {
         var go = GameObject.Instantiate("TestUnregister");
-        GameObjectCache.Update();
-        var objects = GameObjectCache.GameObjects.ToList();
+        GameObjectCache.Instance.Value!.Update();
+        var objects = GameObjectCache.Instance.Value!.GameObjects.ToList();
         Assert.Contains(go, objects);
 
         GameObject.Destroy(go);
-        GameObjectCache.Update();
+        GameObjectCache.Instance.Value!.Update();
 
-        Assert.Empty(GameObjectCache.GameObjects);
+        Assert.Empty(GameObjectCache.Instance.Value!.GameObjects);
     }
 }

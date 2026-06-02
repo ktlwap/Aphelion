@@ -8,12 +8,12 @@ public class ComponentCacheTests : IDisposable
 {
     public ComponentCacheTests()
     {
-        ComponentCache.Clear();
+        ComponentCache.Instance.Value!.Clear();
     }
 
     public void Dispose()
     {
-        ComponentCache.Clear();
+        ComponentCache.Instance.Value!.Clear();
     }
 
     [Fact]
@@ -22,9 +22,9 @@ public class ComponentCacheTests : IDisposable
         var go = GameObject.Instantiate("Test");
         var component = new TestComponent { GameObject = go, Transform = go.Transform };
 
-        ComponentCache.Register(component);
+        ComponentCache.Instance.Value!.Register(component);
 
-        Assert.Empty(ComponentCache.Components);
+        Assert.Empty(ComponentCache.Instance.Value!.Components);
     }
 
     [Fact]
@@ -33,11 +33,11 @@ public class ComponentCacheTests : IDisposable
         var go = GameObject.Instantiate("Test");
         var component = new TestComponent { GameObject = go, Transform = go.Transform };
 
-        ComponentCache.Register(component);
-        ComponentCache.Update();
+        ComponentCache.Instance.Value!.Register(component);
+        ComponentCache.Instance.Value!.Update();
 
-        Assert.Single(ComponentCache.Components);
-        Assert.Contains(component, ComponentCache.Components);
+        Assert.Single(ComponentCache.Instance.Value!.Components);
+        Assert.Contains(component, ComponentCache.Instance.Value!.Components);
     }
 
     [Fact]
@@ -46,8 +46,8 @@ public class ComponentCacheTests : IDisposable
         var go = GameObject.Instantiate("Test");
         var component = new TestComponent { GameObject = go, Transform = go.Transform };
 
-        ComponentCache.Register(component);
-        ComponentCache.Update();
+        ComponentCache.Instance.Value!.Register(component);
+        ComponentCache.Instance.Value!.Update();
 
         Assert.True(component.IsStarted);
     }
@@ -58,14 +58,14 @@ public class ComponentCacheTests : IDisposable
         var go = GameObject.Instantiate("Test");
         var component = new TestComponent { GameObject = go, Transform = go.Transform };
 
-        ComponentCache.Register(component);
-        ComponentCache.Update();
-        Assert.Contains(component, ComponentCache.Components);
+        ComponentCache.Instance.Value!.Register(component);
+        ComponentCache.Instance.Value!.Update();
+        Assert.Contains(component, ComponentCache.Instance.Value!.Components);
 
-        ComponentCache.Unregister(component);
-        ComponentCache.Update();
+        ComponentCache.Instance.Value!.Unregister(component);
+        ComponentCache.Instance.Value!.Update();
 
-        Assert.Empty(ComponentCache.Components);
+        Assert.Empty(ComponentCache.Instance.Value!.Components);
     }
 
     [Fact]
@@ -74,11 +74,11 @@ public class ComponentCacheTests : IDisposable
         var go = GameObject.Instantiate("Test");
         var component = new TestComponent { GameObject = go, Transform = go.Transform };
 
-        ComponentCache.Register(component);
-        ComponentCache.Update();
+        ComponentCache.Instance.Value!.Register(component);
+        ComponentCache.Instance.Value!.Update();
 
-        ComponentCache.Unregister(component);
-        ComponentCache.Update();
+        ComponentCache.Instance.Value!.Unregister(component);
+        ComponentCache.Instance.Value!.Update();
 
         Assert.True(component.IsStopped);
     }

@@ -9,12 +9,12 @@ public class TransformTests : IDisposable
 {
     public TransformTests()
     {
-        GameObjectCache.Clear();
+        GameObjectCache.Instance.Value!.Clear();
     }
 
     public void Dispose()
     {
-        GameObjectCache.Clear();
+        GameObjectCache.Instance.Value!.Clear();
     }
 
     [Fact]

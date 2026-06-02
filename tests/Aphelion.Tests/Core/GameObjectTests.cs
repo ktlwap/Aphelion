@@ -8,14 +8,14 @@ public class GameObjectTests : IDisposable
 {
     public GameObjectTests()
     {
-        GameObjectCache.Clear();
-        ComponentCache.Clear();
+        GameObjectCache.Instance.Value!.Clear();
+        ComponentCache.Instance.Value!.Clear();
     }
 
     public void Dispose()
     {
-        GameObjectCache.Clear();
-        ComponentCache.Clear();
+        GameObjectCache.Instance.Value!.Clear();
+        ComponentCache.Instance.Value!.Clear();
     }
 
     [Fact]
@@ -34,7 +34,7 @@ public class GameObjectTests : IDisposable
     {
         var name = "DuplicateName";
         GameObject.Instantiate(name);
-        GameObjectCache.Update(); // Move to active list so IsNameAlreadyInUse sees it
+        GameObjectCache.Instance.Value!.Update(); // Move to active list so IsNameAlreadyInUse sees it
 
         Assert.Throws<Exception>(() => GameObject.Instantiate(name));
     }
@@ -106,19 +106,19 @@ public class GameObjectTests : IDisposable
         var go = GameObject.Instantiate("Test");
         var component = go.AddComponent<TestComponent>();
 
-        GameObjectCache.Update();
-        ComponentCache.Update();
+        GameObjectCache.Instance.Value!.Update();
+        ComponentCache.Instance.Value!.Update();
 
-        Assert.Contains(go, GameObjectCache.GameObjects);
-        Assert.Contains(component, ComponentCache.Components);
+        Assert.Contains(go, GameObjectCache.Instance.Value!.GameObjects);
+        Assert.Contains(component, ComponentCache.Instance.Value!.Components);
 
         GameObject.Destroy(go);
 
-        GameObjectCache.Update();
-        ComponentCache.Update();
+        GameObjectCache.Instance.Value!.Update();
+        ComponentCache.Instance.Value!.Update();
 
-        Assert.Empty(GameObjectCache.GameObjects);
-        Assert.Empty(ComponentCache.Components);
+        Assert.Empty(GameObjectCache.Instance.Value!.GameObjects);
+        Assert.Empty(ComponentCache.Instance.Value!.Components);
     }
 
     private class TestComponent : BaseComponent

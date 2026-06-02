@@ -16,36 +16,36 @@ public sealed class GameObject
     public string Name { get; set; }
 
     /// <summary>
-    ///     Provides a read-only collection of components attached to the current GameObject.
+    /// Provides a read-only collection of components attached to the current GameObject.
     /// </summary>
     /// <remarks>
-    ///     This property grants access to all the components associated with a GameObject.
-    ///     It returns an immutable list of components, ensuring modifications cannot be
-    ///     made directly to the collection. Components can be added or removed using the
-    ///     respective methods provided by the GameObject class.
-    ///     <para />
-    ///     Note: Accessing this property is an expensive operation as it creates a copy of the internal list.
+    /// This property grants access to all the components associated with a GameObject.
+    /// It returns an immutable list of components, ensuring modifications cannot be
+    /// made directly to the collection. Components can be added or removed using the
+    /// respective methods provided by the GameObject class.
+    /// <para />
+    /// Note: Accessing this property is an expensive operation as it creates a copy of the internal list.
     /// </remarks>
     /// <value>
-    ///     A read-only list of <see cref="BaseComponent" /> instances.
+    /// A read-only list of <see cref="BaseComponent" /> instances.
     /// </value>
     public IReadOnlyList<BaseComponent> Components => _components.AsReadOnly();
 
     public static GameObject Instantiate(string name)
     {
-        if (GameObjectCache.IsNameAlreadyInUse(name))
+        if (GameObjectCache.Instance.Value!.IsNameAlreadyInUse(name))
             throw new Exception("Name already in use: " + name);
 
         var gameObject = new GameObject(name);
-        GameObjectCache.Register(gameObject);
+        GameObjectCache.Instance.Value!.Register(gameObject);
         return gameObject;
     }
 
     public static GameObject Destroy(GameObject gameObject)
     {
-        GameObjectCache.Unregister(gameObject);
+        GameObjectCache.Instance.Value!.Unregister(gameObject);
         foreach (var component in gameObject.Components)
-            ComponentCache.Unregister(component);
+            ComponentCache.Instance.Value!.Unregister(component);
         return gameObject;
     }
 
@@ -62,7 +62,7 @@ public sealed class GameObject
 
         _components.Add(component);
 
-        ComponentCache.Register(component);
+        ComponentCache.Instance.Value!.Register(component);
 
         return component;
     }
@@ -70,7 +70,7 @@ public sealed class GameObject
     public void RemoveComponent<TComponent>() where TComponent : BaseComponent
     {
         BaseComponent component = GetComponent<TComponent>();
-        ComponentCache.Unregister(component);
+        ComponentCache.Instance.Value!.Unregister(component);
         _components.Remove(component);
     }
 
