@@ -24,9 +24,8 @@ internal unsafe class WebGPUFont : IDisposable
     private const float PixelDistScale = 32f;
 
     private readonly Dictionary<char, Glyph> _glyphs;
-    private readonly WebGPUTexture _atlas;
 
-    internal WebGPUTexture Atlas => _atlas;
+    internal WebGPUTexture Atlas { get; }
     internal float BakedSize { get; }
     internal float Ascent { get; }
     internal float Descent { get; }
@@ -38,7 +37,7 @@ internal unsafe class WebGPUFont : IDisposable
         var handle = GCHandle.Alloc(fontBytes, GCHandleType.Pinned);
         try
         {
-            byte* pFontData = (byte*)handle.AddrOfPinnedObject();
+            var pFontData = (byte*)handle.AddrOfPinnedObject();
             var info = new StbTrueType.stbtt_fontinfo();
             if (StbTrueType.stbtt_InitFont(info, pFontData, 0) == 0)
                 throw new InvalidOperationException($"Failed to initialize font: {path}");
@@ -140,7 +139,7 @@ internal unsafe class WebGPUFont : IDisposable
 
     private WebGPUFont(WebGPUTexture atlas, float bakedSize, float ascent, float descent, float lineGap, Dictionary<char, Glyph> glyphs)
     {
-        _atlas = atlas;
+        Atlas = atlas;
         BakedSize = bakedSize;
         Ascent = ascent;
         Descent = descent;
@@ -150,6 +149,6 @@ internal unsafe class WebGPUFont : IDisposable
 
     public void Dispose()
     {
-        _atlas.Dispose();
+        Atlas.Dispose();
     }
 }

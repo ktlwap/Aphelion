@@ -13,6 +13,8 @@ public abstract class BaseComponent
     public virtual void Update() { }
     
     public virtual void Render(DrawCommandBuffer buffer) { }
+    
+    public virtual void RenderUI(DrawCommandBuffer buffer) { }
 
     public virtual void Stop() { }
 }

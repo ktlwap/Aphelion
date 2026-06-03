@@ -29,8 +29,11 @@ public class Window : IDisposable
     private static List<Window> _windows = new();
     
     private readonly IWindow _nativeWindow;
+    private readonly bool _vsync;
     private IInputContext? _inputContext;
     private WebGPUContext? _webGpuContext;
+    private Thread? _updateThread;
+    private volatile bool _stopUpdateThread;
     private bool _isDisposed;
 
     /// <summary>
@@ -78,16 +81,15 @@ public class Window : IDisposable
         options.IsVisible = true;
         options.ShouldSwapAutomatically = false;
         options.IsContextControlDisabled = true;
-        options.VSync = windowCreationOptions.VSync;
 
-        return new Window(Silk.NET.Windowing.Window.Create(options));
+        return new Window(Silk.NET.Windowing.Window.Create(options), windowCreationOptions.VSync);
     }
-    
-    private Window(IWindow nativeWindow)
+
+    private Window(IWindow nativeWindow, bool vsync)
     {
         _nativeWindow = nativeWindow;
+        _vsync = vsync;
         _nativeWindow.Load += Load;
-        _nativeWindow.Update += Update;
         _nativeWindow.Render += Render;
         _nativeWindow.Closing += Closing;
     }
@@ -126,34 +128,60 @@ public class Window : IDisposable
         _inputContext = _nativeWindow.CreateInput();
         Input.CreateInstance(_inputContext);
 
-        _webGpuContext = WebGPUContext.Create(_nativeWindow);
+        _webGpuContext = WebGPUContext.Create(_nativeWindow, _vsync);
 
         var shaderSource = File.ReadAllText("Assets/Shaders/shader.wgsl");
         _webGpuContext.Setup(shaderSource);
+
+        // Adopt the render thread's per-window state on the update thread so both
+        // see the same component cache, game-object cache, input and camera.
+        var sharedComponents = ComponentCache.Instance.Value!;
+        var sharedGameObjects = GameObjectCache.Instance.Value!;
+        var sharedInput = Input.Instance.Value!;
+
+        _stopUpdateThread = false;
+        _updateThread = new Thread(() => UpdateLoop(sharedComponents, sharedGameObjects, sharedInput))
+        {
+            IsBackground = true,
+            Name = "Aphelion-Update"
+        };
+        _updateThread.Start();
     }
 
-    private void Update(double obj)
+    private void UpdateLoop(ComponentCache components, GameObjectCache gameObjects, Input input)
     {
-        GameObjectCache.Instance.Value!.Update();
-        ComponentCache.Instance.Value!.Update();
-        Input.Refresh();
-        foreach (BaseComponent component in ComponentCache.Instance.Value!.Components)
-            component.Update();
+        ComponentCache.Instance.Value = components;
+        GameObjectCache.Instance.Value = gameObjects;
+        Input.Instance.Value = input;
+
+        while (!_stopUpdateThread)
+        {
+            gameObjects.Update();
+            components.Update();
+            Input.Refresh();
+            foreach (BaseComponent component in components.Components)
+                component.Update();
+        }
     }
-    
+
     private void Render(double obj)
     {
-        DrawCommandBuffer drawCommandBuffer = _webGpuContext!.CreateCommandBuffer();
-        
+        DrawCommandBuffer worldBuffer = _webGpuContext!.CreateCommandBuffer();
+        DrawCommandBuffer uiBuffer = _webGpuContext!.CreateCommandBuffer();
+
         foreach (BaseComponent component in ComponentCache.Instance.Value!.Components)
-            component.Render(drawCommandBuffer);
-        
-        _webGpuContext.QueueCommandBuffer(drawCommandBuffer);
+        {
+            component.Render(worldBuffer);
+            component.RenderUI(uiBuffer);
+        }
+
+        _webGpuContext.QueueCommandBuffer(worldBuffer, uiBuffer);
     }
 
     private void Closing()
     {
-        // nothing to do
+        _stopUpdateThread = true;
+        _updateThread?.Join();
     }
     
     public void Dispose()
