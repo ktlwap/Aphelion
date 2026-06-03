@@ -1,4 +1,6 @@
+using Aphelion.Caches;
 using Aphelion.Core;
+using Aphelion.Rendering.WebGPU;
 using Silk.NET.Input;
 using Silk.NET.Maths;
 using Silk.NET.Windowing;
@@ -28,6 +30,7 @@ public class Window : IDisposable
     
     private readonly IWindow _nativeWindow;
     private IInputContext? _inputContext;
+    private WebGPUContext? _webGpuContext;
     private bool _isDisposed;
 
     /// <summary>
@@ -122,6 +125,8 @@ public class Window : IDisposable
     {
         _inputContext = _nativeWindow.CreateInput();
         Input.CreateInstance(_inputContext);
+        
+        _webGpuContext = WebGPUContext.Create(_nativeWindow);
     }
 
     private void Update(double obj)
@@ -131,7 +136,12 @@ public class Window : IDisposable
     
     private void Render(double obj)
     {
-        throw new NotImplementedException();
+        DrawCommandBuffer drawCommandBuffer = _webGpuContext!.CreateCommandBuffer();
+        
+        foreach (BaseComponent component in ComponentCache.Instance.Value!.Components)
+            component.Render(drawCommandBuffer);
+        
+        _webGpuContext.QueueCommandBuffer(drawCommandBuffer);
     }
 
     private void Closing()
@@ -144,6 +154,7 @@ public class Window : IDisposable
         if (!_isDisposed)
         {
             _inputContext?.Dispose();
+            _webGpuContext?.Dispose();
             _nativeWindow.Dispose();
         } 
     }
