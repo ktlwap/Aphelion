@@ -1,3 +1,5 @@
+using Aphelion.Core;
+using Silk.NET.Input;
 using Silk.NET.Maths;
 using Silk.NET.Windowing;
 
@@ -25,6 +27,7 @@ public class Window : IDisposable
     private static List<Window> _windows = new();
     
     private readonly IWindow _nativeWindow;
+    private IInputContext? _inputContext;
     private bool _isDisposed;
 
     /// <summary>
@@ -111,21 +114,19 @@ public class Window : IDisposable
     /// </summary>
     public void Close()
     {
-        if (!_isDisposed)
-        {
-            _nativeWindow.Close();
-            _nativeWindow.Dispose();   
-        }
+        _nativeWindow.Close();
+        _nativeWindow.Dispose();
     }
 
     private void Load()
     {
-        throw new NotImplementedException();
+        _inputContext = _nativeWindow.CreateInput();
+        Input.CreateInstance(_inputContext);
     }
 
     private void Update(double obj)
     {
-        throw new NotImplementedException();
+        Input.Refresh();
     }
     
     private void Render(double obj)
@@ -135,12 +136,15 @@ public class Window : IDisposable
 
     private void Closing()
     {
-        throw new NotImplementedException();
+        Dispose();
     }
     
     public void Dispose()
     {
         if (!_isDisposed)
+        {
+            _inputContext?.Dispose();
             _nativeWindow.Dispose();
+        } 
     }
 }
