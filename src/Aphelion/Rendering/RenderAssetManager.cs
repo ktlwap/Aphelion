@@ -36,6 +36,8 @@ public static class RenderAssetManager
             var texture = new Texture()
             {
                 FileName = fileName,
+                Width = image.Width,
+                Height = image.Height
             };
 
             _textures[texture] = WebGPUTexture.Upload(_webGpu, _context, (uint)image.Width, (uint)image.Height, pData,
