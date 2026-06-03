@@ -1,9 +1,6 @@
 namespace Aphelion.Rendering;
 
-public abstract class Texture
+public class Texture
 {
-    public static void Load(string fileName)
-    {
-        // TODO
-    }
+    public required string FileName { get; init; }
 }

@@ -125,13 +125,20 @@ public class Window : IDisposable
     {
         _inputContext = _nativeWindow.CreateInput();
         Input.CreateInstance(_inputContext);
-        
+
         _webGpuContext = WebGPUContext.Create(_nativeWindow);
+
+        var shaderSource = File.ReadAllText("Assets/Shaders/shader.wgsl");
+        _webGpuContext.Setup(shaderSource);
     }
 
     private void Update(double obj)
     {
+        GameObjectCache.Instance.Value!.Update();
+        ComponentCache.Instance.Value!.Update();
         Input.Refresh();
+        foreach (BaseComponent component in ComponentCache.Instance.Value!.Components)
+            component.Update();
     }
     
     private void Render(double obj)
@@ -146,7 +153,7 @@ public class Window : IDisposable
 
     private void Closing()
     {
-        Dispose();
+        // nothing to do
     }
     
     public void Dispose()

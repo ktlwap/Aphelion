@@ -1,14 +1,18 @@
 using System.Runtime.InteropServices;
 using Silk.NET.WebGPU;
+using Buffer = Silk.NET.WebGPU.Buffer;
 
 namespace Aphelion.Rendering.WebGPU;
 
 internal unsafe class WebGPURenderPipeline : IDisposable
 {
     private readonly Silk.NET.WebGPU.WebGPU _webGpu;
-    private readonly RenderPipeline* pRenderPipeline;
+    private readonly BindGroupLayout* _uniformGroupLayout;
+    private readonly BindGroupLayout* _textureGroupLayout;
 
-    public static WebGPURenderPipeline Compile(Silk.NET.WebGPU.WebGPU webGpu, WebGPUContext context, WebGPUBuffer<uint> uniformBuffer, string shaderSource, VertexAttribute* pAttributes, uint attributeCount, uint stride)
+    internal RenderPipeline* RenderPipeline { get; }
+
+    internal static WebGPURenderPipeline Compile(Silk.NET.WebGPU.WebGPU webGpu, WebGPUContext context, WebGPUUniformBuffer uniformBuffer, string shaderSource, VertexAttribute* pAttributes, uint attributeCount, uint stride)
     {
         var shaderDescriptor = new ShaderModuleDescriptor();
         var wgslDescriptor = new ShaderModuleWGSLDescriptor
@@ -26,7 +30,6 @@ internal unsafe class WebGPURenderPipeline : IDisposable
         
         Marshal.FreeHGlobal((IntPtr)wgslDescriptor.Code);
         
-        // TODO:
         BindGroupLayoutEntry uniformLayoutEntry = new BindGroupLayoutEntry
         {
             Binding = 0,
@@ -34,34 +37,19 @@ internal unsafe class WebGPURenderPipeline : IDisposable
             Buffer = new BufferBindingLayout
             {
                 Type = BufferBindingType.Uniform,
-                HasDynamicOffset = true,
+                HasDynamicOffset = false,
                 MinBindingSize = 64
             }
         };
 
-        BindGroupLayoutDescriptor quadLayoutDesc = new BindGroupLayoutDescriptor
+        var quadLayoutDesc = new BindGroupLayoutDescriptor
         {
             EntryCount = 1,
             Entries = &uniformLayoutEntry
         };
-        BindGroupLayout* uniformGroupLayout = webGpu.DeviceCreateBindGroupLayout(context.Device, &quadLayoutDesc);
+        var uniformGroupLayout = webGpu.DeviceCreateBindGroupLayout(context.Device, &quadLayoutDesc);
         
-        BindGroupEntry uniformBindGroupEntry = new BindGroupEntry
-        {
-            Binding = 0,
-            Buffer = uniformBuffer.Buffer,
-            Size = uniformBuffer.Size,
-        };
-
-        BindGroupDescriptor quadBindGroupDesc = new BindGroupDescriptor
-        {
-            Layout = uniformGroupLayout,
-            EntryCount = 1,
-            Entries = &uniformBindGroupEntry
-        };
-        BindGroup* bindGroup = webGpu.DeviceCreateBindGroup(context.Device, &quadBindGroupDesc);
-        
-        BindGroupLayoutEntry textureEntry = new BindGroupLayoutEntry
+        var textureEntry = new BindGroupLayoutEntry
         {
             Binding = 0,
             Visibility = ShaderStage.Fragment,
@@ -73,7 +61,7 @@ internal unsafe class WebGPURenderPipeline : IDisposable
             }
         };
         
-        BindGroupLayoutEntry samplerEntry = new BindGroupLayoutEntry
+        var samplerEntry = new BindGroupLayoutEntry
         {
             Binding = 1,
             Visibility = ShaderStage.Fragment,
@@ -83,46 +71,30 @@ internal unsafe class WebGPURenderPipeline : IDisposable
             }
         };
         
-        BindGroupLayoutEntry* spriteLayoutEntries = stackalloc BindGroupLayoutEntry[2];
+        var spriteLayoutEntries = stackalloc BindGroupLayoutEntry[2];
         spriteLayoutEntries[0] = textureEntry;
         spriteLayoutEntries[1] = samplerEntry;
 
-        BindGroupLayoutDescriptor spriteLayoutDesc = new BindGroupLayoutDescriptor
+        var spriteLayoutDesc = new BindGroupLayoutDescriptor
         {
             EntryCount = 2,
             Entries = spriteLayoutEntries
         };
-        BindGroupLayout* textureGroupLayout = webGpu.DeviceCreateBindGroupLayout(context.Device, &spriteLayoutDesc);
+        var textureGroupLayout = webGpu.DeviceCreateBindGroupLayout(context.Device, &spriteLayoutDesc);
 
         BindGroupLayout** bindGroupLayouts = stackalloc BindGroupLayout*[2];
         bindGroupLayouts[0] = uniformGroupLayout;
         bindGroupLayouts[1] = textureGroupLayout;
-        
-        VertexAttribute* vertexAttributes = stackalloc VertexAttribute[7];
-        // Position -> vec2<f32>
-        vertexAttributes[0] = new VertexAttribute { Format = VertexFormat.Float32x2, Offset = 0, ShaderLocation = 0 };
-        // Uv -> vec2<f32>
-        vertexAttributes[1] = new VertexAttribute { Format = VertexFormat.Float32x2, Offset = 2 * sizeof(float), ShaderLocation = 1 };
-        // InstancePosition -> vec2<f32>
-        vertexAttributes[2] = new VertexAttribute { Format = VertexFormat.Float32x2, Offset = 4 * sizeof(float), ShaderLocation = 2 };
-        // InstanceScale -> vec2<f32>
-        vertexAttributes[3] = new VertexAttribute { Format = VertexFormat.Float32x2, Offset = 6 * sizeof(float), ShaderLocation = 3 };
-        // InstanceRotation -> f32
-        vertexAttributes[4] = new VertexAttribute { Format = VertexFormat.Float32, Offset = 8 * sizeof(float), ShaderLocation = 4 };
-        // InstanceZIndex -> f32
-        vertexAttributes[5] = new VertexAttribute { Format = VertexFormat.Float32, Offset = 9 * sizeof(float), ShaderLocation = 5 };
-        // InstanceColor -> vec4<f32>
-        vertexAttributes[6] = new VertexAttribute { Format = VertexFormat.Float32x4, Offset = 10 * sizeof(float), ShaderLocation = 6 };
 
-        PipelineLayoutDescriptor pipelineLayoutDesc = new PipelineLayoutDescriptor
+        var pipelineLayoutDesc = new PipelineLayoutDescriptor
         {
             BindGroupLayoutCount = 2,
             BindGroupLayouts = bindGroupLayouts
         };
         
-        PipelineLayout* pipelineLayout = webGpu.DeviceCreatePipelineLayout(context.Device, &pipelineLayoutDesc);
+        var pipelineLayout = webGpu.DeviceCreatePipelineLayout(context.Device, &pipelineLayoutDesc);
 
-        VertexBufferLayout bufferLayout = new VertexBufferLayout
+        var bufferLayout = new VertexBufferLayout
         {
             ArrayStride = stride,
             StepMode = VertexStepMode.Vertex,
@@ -130,20 +102,20 @@ internal unsafe class WebGPURenderPipeline : IDisposable
             Attributes = pAttributes
         };
 
-        BlendState blendState = new BlendState
+        var blendState = new BlendState
         {
             Color = new BlendComponent { SrcFactor = BlendFactor.SrcAlpha, DstFactor = BlendFactor.OneMinusSrcAlpha, Operation = BlendOperation.Add },
             Alpha = new BlendComponent { SrcFactor = BlendFactor.One, DstFactor = BlendFactor.One, Operation = BlendOperation.Add }
         };
 
-        ColorTargetState colorTarget = new ColorTargetState
+        var colorTarget = new ColorTargetState
         {
             Format = context.SwapChainFormat,
             WriteMask = ColorWriteMask.All,
             Blend = &blendState
         };
 
-        FragmentState fragmentState = new FragmentState
+        var fragmentState = new FragmentState
         {
             Module = pShaderModule,
             EntryPoint = (byte*)Marshal.StringToHGlobalAnsi("fs_main"),
@@ -151,7 +123,7 @@ internal unsafe class WebGPURenderPipeline : IDisposable
             Targets = &colorTarget
         };
 
-        RenderPipelineDescriptor pipelineDesc = new RenderPipelineDescriptor
+        var pipelineDesc = new RenderPipelineDescriptor
         {
             Layout = pipelineLayout,
             Vertex = new VertexState
@@ -176,29 +148,60 @@ internal unsafe class WebGPURenderPipeline : IDisposable
             Fragment = &fragmentState
         };
 
-        RenderPipeline* renderPipeline = webGpu.DeviceCreateRenderPipeline(context.Device, &pipelineDesc);
+        var renderPipeline = webGpu.DeviceCreateRenderPipeline(context.Device, &pipelineDesc);
 
         Marshal.FreeHGlobal((IntPtr)fragmentState.EntryPoint);
         Marshal.FreeHGlobal((IntPtr)pipelineDesc.Vertex.EntryPoint);
         webGpu.PipelineLayoutRelease(pipelineLayout);
         webGpu.ShaderModuleRelease(pShaderModule);
 
-        return new WebGPURenderPipeline(webGpu, renderPipeline, bindGroupLayouts);
+        return new WebGPURenderPipeline(webGpu, renderPipeline, uniformGroupLayout, textureGroupLayout);
     }
 
-    private WebGPURenderPipeline(WebGPU webGpu, RenderPipeline* renderPipeline, BindGroup* bindGroup, BindGroupLayout* uniformGroupLayout, BindGroupLayout* textureGroupLayout)
+    internal BindGroup* CreateUniformBindGroup(Device* device, Buffer* uniformBuffer, ulong bufferSize)
+    {
+        var entry = new BindGroupEntry
+        {
+            Binding = 0,
+            Buffer = uniformBuffer,
+            Offset = 0,
+            Size = bufferSize
+        };
+        var desc = new BindGroupDescriptor
+        {
+            Layout = _uniformGroupLayout,
+            EntryCount = 1,
+            Entries = &entry
+        };
+        return _webGpu.DeviceCreateBindGroup(device, &desc);
+    }
+
+    internal BindGroup* CreateTextureBindGroup(Device* device, TextureView* textureView, Sampler* sampler)
+    {
+        var entries = stackalloc BindGroupEntry[2];
+        entries[0] = new BindGroupEntry { Binding = 0, TextureView = textureView };
+        entries[1] = new BindGroupEntry { Binding = 1, Sampler = sampler };
+        var desc = new BindGroupDescriptor
+        {
+            Layout = _textureGroupLayout,
+            EntryCount = 2,
+            Entries = entries
+        };
+        return _webGpu.DeviceCreateBindGroup(device, &desc);
+    }
+
+    private WebGPURenderPipeline(Silk.NET.WebGPU.WebGPU webGpu, RenderPipeline* renderPipeline, BindGroupLayout* uniformGroupLayout, BindGroupLayout* textureGroupLayout)
     {
         _webGpu = webGpu;
         RenderPipeline = renderPipeline;
+        _uniformGroupLayout = uniformGroupLayout;
+        _textureGroupLayout = textureGroupLayout;
     }
 
     public void Dispose()
     {
+        _webGpu.BindGroupLayoutRelease(_uniformGroupLayout);
+        _webGpu.BindGroupLayoutRelease(_textureGroupLayout);
         _webGpu.RenderPipelineRelease(RenderPipeline);
-    }
-    
-    public void Dispose()
-    {
-        
     }
 }

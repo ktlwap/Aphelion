@@ -2,13 +2,11 @@ using Silk.NET.WebGPU;
 
 namespace Aphelion.Rendering.WebGPU;
 
-internal unsafe class WebGPUTexture : Texture, IDisposable
+internal unsafe class WebGPUTexture : IDisposable
 {
     private readonly Silk.NET.WebGPU.WebGPU _webGpu;
     private readonly Silk.NET.WebGPU.Texture* _pTexture;
     private readonly TextureView* _pTextureView;
-    private readonly uint _width;
-    private readonly uint _height;
     
     internal static WebGPUTexture Upload(Silk.NET.WebGPU.WebGPU webGpu, WebGPUContext context, uint width, uint height, byte* pData, uint dataLength)
     {
@@ -43,16 +41,16 @@ internal unsafe class WebGPUTexture : Texture, IDisposable
         };
         var pTextureView = webGpu.TextureCreateView(pTexture, &viewDesc);
 
-        return new WebGPUTexture(webGpu, pTexture, pTextureView, width, height);
+        return new WebGPUTexture(webGpu, pTexture, pTextureView);
     }
     
-    private WebGPUTexture(Silk.NET.WebGPU.WebGPU webGpu, Silk.NET.WebGPU.Texture* pTexture, TextureView* pTextureView, uint width, uint height)
+    internal TextureView* TextureView => _pTextureView;
+
+    private WebGPUTexture(Silk.NET.WebGPU.WebGPU webGpu, Silk.NET.WebGPU.Texture* pTexture, TextureView* pTextureView)
     {
         _webGpu = webGpu;
         _pTexture = pTexture;
         _pTextureView = pTextureView;
-        _width = width;
-        _height = height;
     }
 
     public void Dispose()

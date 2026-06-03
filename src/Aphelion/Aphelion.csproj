@@ -12,14 +12,19 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="Silk.NET.Input" Version="2.23.0" PrivateAssets="all"/>
-        <PackageReference Include="Silk.NET.WebGPU" Version="2.23.0" PrivateAssets="all"/>
-        <PackageReference Include="Silk.NET.WebGPU.Native.WGPU" Version="2.23.0" PrivateAssets="all"/>
-        <PackageReference Include="Silk.NET.Windowing" Version="2.23.0" PrivateAssets="all"/>
+        <PackageReference Include="Silk.NET.Input" Version="2.23.0" />
+        <PackageReference Include="Silk.NET.WebGPU" Version="2.23.0" />
+        <PackageReference Include="Silk.NET.WebGPU.Native.WGPU" Version="2.23.0" />
+        <PackageReference Include="Silk.NET.Windowing" Version="2.23.0" />
+        <PackageReference Include="StbImageSharp" Version="2.27.13" />
+        <PackageReference Include="StbTrueTypeSharp" Version="1.26.12" />
     </ItemGroup>
 
     <ItemGroup>
       <None Update="Assets\Shaders\shader.wgsl">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+      <None Update="Assets\Fonts\*.ttf">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </None>
     </ItemGroup>

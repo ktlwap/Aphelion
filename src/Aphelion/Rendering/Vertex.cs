@@ -8,9 +8,10 @@ public struct Vertex
 {
     public Vector2 Position;
     public Vector2 Uv;
-    public Vector3 InstancePosition;
+    public Vector2 InstancePosition;
     public Vector2 Scale;
     public float Rotation;
     public float ZIndex;
     public Vector4 Color;
+    public float IsSdf;
 }

@@ -9,7 +9,7 @@ struct Uniforms {
 struct VertexInput {
     // Per-vertex
     @location(0) position:   vec2<f32>,
-    @location(1) uv: vec2<f32>,
+    @location(1) uv:         vec2<f32>,
 
     // Per-instance
     @location(2) inst_position: vec2<f32>,
@@ -17,12 +17,14 @@ struct VertexInput {
     @location(4) inst_rotation: f32,
     @location(5) inst_zindex:   f32,
     @location(6) inst_color:    vec4<f32>,
+    @location(7) inst_is_sdf:   f32,
 };
 
 struct VertexOutput {
     @builtin(position) clip_position: vec4<f32>,
     @location(0) color: vec4<f32>,
     @location(1) uv: vec2<f32>,
+    @location(2) is_sdf: f32,
 };
 
 fn rotate2d(v: vec2<f32>, angle: f32) -> vec2<f32> {
@@ -46,10 +48,19 @@ fn vs_main(input: VertexInput) -> VertexOutput {
     out.clip_position = uniforms.projection_view * world_pos;
     out.color = input.inst_color;
     out.uv = input.uv;
+    out.is_sdf = input.inst_is_sdf;
     return out;
 }
 
 @fragment
 fn fs_main(input: VertexOutput) -> @location(0) vec4<f32> {
-    return textureSample(t_diffuse, s_diffuse, input.uv) * input.color;
+    let sample = textureSample(t_diffuse, s_diffuse, input.uv);
+    if (input.is_sdf > 0.5) {
+        // SDF: edge at 0.5; smoothing follows on-screen derivative for crisp edges at any scale.
+        let dist = sample.r;
+        let smoothing = max(fwidth(dist) * 0.75, 0.001);
+        let alpha = smoothstep(0.5 - smoothing, 0.5 + smoothing, dist);
+        return vec4<f32>(input.color.rgb, input.color.a * alpha);
+    }
+    return sample * input.color;
 }
