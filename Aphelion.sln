@@ -16,6 +16,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TextureRenderSample", "samp
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WorldUiRenderSample", "samples\WorldUiRenderSample\WorldUiRenderSample.csproj", "{AE1194D4-8EBC-4604-A3BB-30DB6C9B0B53}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ColliderClickSample", "samples\ColliderClickSample\ColliderClickSample.csproj", "{4AE0E0C3-9983-4F88-9CEF-AA90E5E58DC1}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -98,6 +100,18 @@ Global
 		{AE1194D4-8EBC-4604-A3BB-30DB6C9B0B53}.Release|x64.Build.0 = Release|Any CPU
 		{AE1194D4-8EBC-4604-A3BB-30DB6C9B0B53}.Release|x86.ActiveCfg = Release|Any CPU
 		{AE1194D4-8EBC-4604-A3BB-30DB6C9B0B53}.Release|x86.Build.0 = Release|Any CPU
+		{4AE0E0C3-9983-4F88-9CEF-AA90E5E58DC1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4AE0E0C3-9983-4F88-9CEF-AA90E5E58DC1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4AE0E0C3-9983-4F88-9CEF-AA90E5E58DC1}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{4AE0E0C3-9983-4F88-9CEF-AA90E5E58DC1}.Debug|x64.Build.0 = Debug|Any CPU
+		{4AE0E0C3-9983-4F88-9CEF-AA90E5E58DC1}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{4AE0E0C3-9983-4F88-9CEF-AA90E5E58DC1}.Debug|x86.Build.0 = Debug|Any CPU
+		{4AE0E0C3-9983-4F88-9CEF-AA90E5E58DC1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4AE0E0C3-9983-4F88-9CEF-AA90E5E58DC1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4AE0E0C3-9983-4F88-9CEF-AA90E5E58DC1}.Release|x64.ActiveCfg = Release|Any CPU
+		{4AE0E0C3-9983-4F88-9CEF-AA90E5E58DC1}.Release|x64.Build.0 = Release|Any CPU
+		{4AE0E0C3-9983-4F88-9CEF-AA90E5E58DC1}.Release|x86.ActiveCfg = Release|Any CPU
+		{4AE0E0C3-9983-4F88-9CEF-AA90E5E58DC1}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -108,5 +122,6 @@ Global
 		{49A0DE41-BD00-4C7C-A997-26649DE75E3D} = {FFA87D8A-37A0-4F25-A201-5F691A11C017}
 		{37ECBB38-8ABD-4889-AECF-10AB9FF54BC3} = {FFA87D8A-37A0-4F25-A201-5F691A11C017}
 		{AE1194D4-8EBC-4604-A3BB-30DB6C9B0B53} = {FFA87D8A-37A0-4F25-A201-5F691A11C017}
+		{4AE0E0C3-9983-4F88-9CEF-AA90E5E58DC1} = {FFA87D8A-37A0-4F25-A201-5F691A11C017}
 	EndGlobalSection
 EndGlobal

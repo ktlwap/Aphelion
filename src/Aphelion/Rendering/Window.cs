@@ -158,9 +158,10 @@ public class Window : IDisposable
         {
             gameObjects.Update();
             components.Update();
-            Input.Refresh();
             foreach (BaseComponent component in components.Components)
                 component.Update();
+            
+            Input.Refresh();
         }
     }
 
