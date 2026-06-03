@@ -17,50 +17,69 @@ internal struct GameObjectCacheEvent
 internal class GameObjectCache
 {
     internal static ThreadLocal<GameObjectCache> Instance = new (() => new GameObjectCache());
-    
+
+    private readonly object _lock = new();
     private readonly List<GameObject> _gameObjects = new();
     private readonly List<GameObjectCacheEvent> _unitializedGameObjects = new();
 
-    internal IReadOnlyList<GameObject> GameObjects => _gameObjects;
+    internal IReadOnlyList<GameObject> GameObjects
+    {
+        get { lock (_lock) return _gameObjects.ToArray(); }
+    }
 
     internal void Register(GameObject gameObject)
     {
-        _unitializedGameObjects.Add(new GameObjectCacheEvent
+        lock (_lock)
         {
-            GameObject = gameObject,
-            EventType = GameObjectCacheEventType.Added
-        });
+            _unitializedGameObjects.Add(new GameObjectCacheEvent
+            {
+                GameObject = gameObject,
+                EventType = GameObjectCacheEventType.Added
+            });
+        }
     }
 
     internal void Unregister(GameObject gameObject)
     {
-        _unitializedGameObjects.Add(new GameObjectCacheEvent
+        lock (_lock)
         {
-            GameObject = gameObject,
-            EventType = GameObjectCacheEventType.Removed
-        });
+            _unitializedGameObjects.Add(new GameObjectCacheEvent
+            {
+                GameObject = gameObject,
+                EventType = GameObjectCacheEventType.Removed
+            });
+        }
     }
 
     internal bool IsNameAlreadyInUse(string name)
     {
-        return _gameObjects.Any(go => go.Name == name);
+        lock (_lock)
+            return _gameObjects.Any(go => go.Name == name);
     }
 
     internal void Update()
     {
-        var events = _unitializedGameObjects.ToArray();
-        _unitializedGameObjects.Clear();
+        lock (_lock)
+        {
+            if (_unitializedGameObjects.Count == 0)
+                return;
 
-        foreach (var @event in events)
-            if (GameObjectCacheEventType.Added == @event.EventType)
-                _gameObjects.Add(@event.GameObject);
-            else
-                _gameObjects.Remove(@event.GameObject);
+            foreach (var @event in _unitializedGameObjects)
+                if (GameObjectCacheEventType.Added == @event.EventType)
+                    _gameObjects.Add(@event.GameObject);
+                else
+                    _gameObjects.Remove(@event.GameObject);
+
+            _unitializedGameObjects.Clear();
+        }
     }
 
     internal void Clear()
     {
-        _gameObjects.Clear();
-        _unitializedGameObjects.Clear();
+        lock (_lock)
+        {
+            _gameObjects.Clear();
+            _unitializedGameObjects.Clear();
+        }
     }
 }

@@ -33,7 +33,7 @@ public enum KeyCode
 
 public class Input
 {
-    private static ThreadLocal<Input> Instance = new(trackAllValues: true);
+    internal static ThreadLocal<Input> Instance = new(trackAllValues: true);
     
     private readonly IInputContext _inputContext;
     private readonly Dictionary<MouseButton, InputState> _mouseButtonStates = new();
