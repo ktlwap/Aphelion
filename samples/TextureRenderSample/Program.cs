@@ -1,5 +1,6 @@
 using System.Drawing;
 using System.Numerics;
+using Aphelion.Components;
 using Aphelion.Core;
 using Aphelion.Rendering;
 using TextureRenderSample;
@@ -32,6 +33,8 @@ AddSpinning("SpinnerLeft", DotNet, new Vector2(360, 580), new Vector2(160, 160),
     MathF.PI);
 AddSpinning("SpinnerRight", WebGpu, new Vector2(640, 580), new Vector2(160, 160), Color.FromArgb(180, 200, 220, 255),
     -MathF.PI);
+
+GameObject.Instantiate("Camera").AddComponent<Camera>();
 
 window.Run();
 

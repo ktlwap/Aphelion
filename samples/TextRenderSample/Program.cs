@@ -1,5 +1,6 @@
 using System.Drawing;
 using System.Numerics;
+using Aphelion.Components;
 using Aphelion.Core;
 using Aphelion.Rendering;
 using TextRenderSample;
@@ -29,6 +30,8 @@ AddText("BlackOps24", new Vector2(40, 490), "Black Ops 24px — MISSION BRIEFING
 AddText("BlackOps48", new Vector2(40, 540), "BLACK OPS 48px", BlackOps, 48f, Color.OrangeRed);
 
 AddText("Script32", new Vector2(40, 620), "Playwrite 32px — Greetings!", Playwrite, 32f, Color.Pink);
+
+GameObject.Instantiate("Camera").AddComponent<Camera>();
 
 window.Run();
 

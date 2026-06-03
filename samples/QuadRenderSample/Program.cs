@@ -1,5 +1,6 @@
 using System.Drawing;
 using System.Numerics;
+using Aphelion.Components;
 using Aphelion.Core;
 using Aphelion.Rendering;
 using QuadRenderSample;
@@ -56,5 +57,7 @@ spinComp.Size = new Vector2(100, 100);
 spinComp.ZIndex = 1f;
 spinComp.SpinSpeed = MathF.PI; // half-turn per second
 spinner.Transform.Position = new Vector2(400, 300);
+
+GameObject.Instantiate("Camera").AddComponent<Camera>();
 
 window.Run();
