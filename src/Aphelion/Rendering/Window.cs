@@ -122,6 +122,15 @@ public unsafe class Window : NativeView, IDisposable
     {
         _glfw.GetWindowSize(_pWindowHandle, out var width, out var height);
         Size = new Vector2(width, height);
+
+        var previousTotalTime = Time.Total;
+        var newTotalTime = _glfw.GetTime();
+        var deltaTime = newTotalTime - previousTotalTime;
+
+        Time.Total = newTotalTime;
+        Time.Delta = deltaTime;
+        Time.TotalF = (float)newTotalTime;
+        Time.DeltaF = (float)deltaTime;
     }
 
     public void Dispose()
