@@ -1,7 +1,7 @@
 using Aphelion.Caches;
 using Aphelion.Core;
 using Aphelion.Rendering.WebGPU;
-using Silk.NET.Input;
+using Silk.NET.GLFW;
 using Silk.NET.Maths;
 using Silk.NET.Windowing;
 
@@ -23,18 +23,21 @@ public struct WindowCreationOptions
 /// customizable parameters such as size, title, and graphics settings. This class also provides
 /// functionality for managing a main application window and supports multiple window instances.
 /// </remarks>
-public class Window : IDisposable
+public unsafe class Window : IDisposable
 {
     private static Window? _mainWindow;
     private static List<Window> _windows = new();
-    
+
+    internal static ThreadLocal<Input?> CurrentInput { get; } = new(trackAllValues: true);
+
     private readonly IWindow _nativeWindow;
     private readonly bool _vsync;
-    private IInputContext? _inputContext;
+    private Input? _input;
     private WebGPUContext? _webGpuContext;
-    private Thread? _updateThread;
     private volatile bool _stopUpdateThread;
     private bool _isDisposed;
+
+    public Input Input => _input ?? throw new InvalidOperationException("Input is not initialized until the window has loaded.");
 
     /// <summary>
     /// Gets the reference to the main application window.
@@ -91,6 +94,7 @@ public class Window : IDisposable
         _vsync = vsync;
         _nativeWindow.Load += Load;
         _nativeWindow.Render += Render;
+        _nativeWindow.Update += Update;
         _nativeWindow.Closing += Closing;
     }
 
@@ -125,43 +129,28 @@ public class Window : IDisposable
 
     private void Load()
     {
-        _inputContext = _nativeWindow.CreateInput();
-        Input.CreateInstance(_inputContext);
+        var glfwHandle = _nativeWindow.Native?.Glfw
+            ?? throw new InvalidOperationException("Window backend is not GLFW; cannot initialize Input.");
+        _input = new Input(Glfw.GetApi(), (WindowHandle*)glfwHandle);
+        CurrentInput.Value = _input;
 
         _webGpuContext = WebGPUContext.Create(_nativeWindow, _vsync);
 
         var shaderSource = File.ReadAllText("Assets/Shaders/shader.wgsl");
         _webGpuContext.Setup(shaderSource);
-
-        // Adopt the render thread's per-window state on the update thread so both
-        // see the same component cache, game-object cache, input and camera.
-        var sharedComponents = ComponentCache.Instance.Value!;
-        var sharedGameObjects = GameObjectCache.Instance.Value!;
-        var sharedInput = Input.Instance.Value!;
-
-        _stopUpdateThread = false;
-        _updateThread = new Thread(() => UpdateLoop(sharedComponents, sharedGameObjects, sharedInput))
-        {
-            IsBackground = true,
-            Name = "Aphelion-Update"
-        };
-        _updateThread.Start();
     }
 
-    private void UpdateLoop(ComponentCache components, GameObjectCache gameObjects, Input input)
+    private void Update(double delta)
     {
-        ComponentCache.Instance.Value = components;
-        GameObjectCache.Instance.Value = gameObjects;
-        Input.Instance.Value = input;
-
         while (!_stopUpdateThread)
         {
-            gameObjects.Update();
-            components.Update();
-            foreach (BaseComponent component in components.Components)
+            _input?.Refresh();
+            ComponentCache.Instance.Value.Update();
+            ComponentCache.Instance.Value.Update();
+            foreach (BaseComponent component in ComponentCache.Instance.Value!.Components)
+            {
                 component.Update();
-            
-            Input.Refresh();
+            }
         }
     }
 
@@ -182,16 +171,14 @@ public class Window : IDisposable
     private void Closing()
     {
         _stopUpdateThread = true;
-        _updateThread?.Join();
     }
     
     public void Dispose()
     {
         if (!_isDisposed)
         {
-            _inputContext?.Dispose();
             _webGpuContext?.Dispose();
             _nativeWindow.Dispose();
-        } 
+        }
     }
 }
