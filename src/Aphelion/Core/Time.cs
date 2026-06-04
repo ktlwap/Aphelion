@@ -6,7 +6,7 @@ public static class Time
     
     public static double Total { get; internal set; }
     
-    public static double DeltaF { get; internal set; }
+    public static float DeltaF { get; internal set; }
     
-    public static double TotalF { get; internal set; }
+    public static float TotalF { get; internal set; }
 }
