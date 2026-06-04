@@ -28,8 +28,6 @@ public unsafe class Window : IDisposable
     private static Window? _mainWindow;
     private static List<Window> _windows = new();
 
-    internal static ThreadLocal<Input?> CurrentInput { get; } = new(trackAllValues: true);
-
     private readonly IWindow _nativeWindow;
     private readonly bool _vsync;
     private Input? _input;
@@ -64,6 +62,8 @@ public unsafe class Window : IDisposable
     /// A read-only collection of <see cref="Window"/> instances representing all created windows.
     /// </returns>
     public static IReadOnlyList<Window> Windows => _windows.AsReadOnly();
+    
+    public BaseScene CurrentScene { get; private set; }
 
     /// <summary>
     /// Creates a new instance of the <see cref="Window"/> class with the specified creation options.
@@ -105,8 +105,9 @@ public unsafe class Window : IDisposable
     /// This method initiates the execution of the window. If this is the first window being run,
     /// it will become the application's main window. Subsequent windows will be executed on separate threads.
     /// </remarks>
-    public void Run()
+    public void Run<TScene>() where TScene : BaseScene, new()
     {
+        CurrentScene = new TScene();
         _windows.Add(this);
         
         if (MainWindow == null)
@@ -115,7 +116,7 @@ public unsafe class Window : IDisposable
             _nativeWindow.Run();
         }
         else
-            new Thread(Run).Start();
+            throw new Exception("Cannot run multiple windows.");
     }
 
     /// <summary>
@@ -132,25 +133,23 @@ public unsafe class Window : IDisposable
         var glfwHandle = _nativeWindow.Native?.Glfw
             ?? throw new InvalidOperationException("Window backend is not GLFW; cannot initialize Input.");
         _input = new Input(Glfw.GetApi(), (WindowHandle*)glfwHandle);
-        CurrentInput.Value = _input;
 
         _webGpuContext = WebGPUContext.Create(_nativeWindow, _vsync);
 
         var shaderSource = File.ReadAllText("Assets/Shaders/shader.wgsl");
         _webGpuContext.Setup(shaderSource);
+        
+        CurrentScene.Start();
     }
 
     private void Update(double delta)
     {
-        while (!_stopUpdateThread)
+        _input?.Refresh();
+        ComponentCache.Instance.Value.Update();
+        ComponentCache.Instance.Value.Update();
+        foreach (BaseComponent component in ComponentCache.Instance.Value!.Components)
         {
-            _input?.Refresh();
-            ComponentCache.Instance.Value.Update();
-            ComponentCache.Instance.Value.Update();
-            foreach (BaseComponent component in ComponentCache.Instance.Value!.Components)
-            {
-                component.Update();
-            }
+            component.Update();
         }
     }
 
@@ -170,6 +169,7 @@ public unsafe class Window : IDisposable
 
     private void Closing()
     {
+        CurrentScene.Stop();
         _stopUpdateThread = true;
     }
     
