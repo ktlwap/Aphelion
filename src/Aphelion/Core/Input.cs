@@ -27,7 +27,6 @@ public enum KeyCode
         Period,
         Slash,
         Number0,
-        D0 = Number0,
         Number1,
         Number2,
         Number3,
@@ -158,7 +157,7 @@ public unsafe class Input
 
     internal Input(Glfw glfw, WindowHandle* pWindowHandle)
     {
-        Instance.Values.Add(this);
+        Instance.Value = this;
         
         _glfw = glfw;
         _pWindowHandle = pWindowHandle;
