@@ -14,7 +14,7 @@ internal unsafe class WebGPUTexture : IDisposable
         var descriptor = new TextureDescriptor
         {
             Size = extent,
-            Format = TextureFormat.Rgba8Unorm,
+            Format = TextureFormat.Rgba8UnormSrgb,
             Usage = TextureUsage.TextureBinding | TextureUsage.CopyDst,
             Dimension = TextureDimension.Dimension2D,
             MipLevelCount = 1,
@@ -33,7 +33,7 @@ internal unsafe class WebGPUTexture : IDisposable
 
         var viewDesc = new TextureViewDescriptor
         {
-            Format = TextureFormat.Rgba8Unorm,
+            Format = TextureFormat.Rgba8UnormSrgb,
             Dimension = TextureViewDimension.Dimension2D,
             Aspect = TextureAspect.All,
             MipLevelCount = 1,
