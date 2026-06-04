@@ -1,9 +1,8 @@
+using System.Numerics;
 using Aphelion.Caches;
 using Aphelion.Core;
 using Aphelion.Rendering.WebGPU;
 using Silk.NET.GLFW;
-using Silk.NET.Maths;
-using Silk.NET.Windowing;
 
 namespace Aphelion.Rendering;
 
@@ -15,136 +14,81 @@ public struct WindowCreationOptions
     public bool VSync;
 }
 
-/// <summary>
-/// Represents a graphical application window that can be created, managed, and rendered.
-/// </summary>
-/// <remarks>
-/// The <see cref="Window"/> class allows developers to create and manage application windows with
-/// customizable parameters such as size, title, and graphics settings. This class also provides
-/// functionality for managing a main application window and supports multiple window instances.
-/// </remarks>
-public unsafe class Window : IDisposable
+public unsafe class Window : NativeView, IDisposable
 {
-    private static Window? _mainWindow;
-    private static List<Window> _windows = new();
-
-    private readonly IWindow _nativeWindow;
-    private readonly bool _vsync;
     private Input? _input;
     private WebGPUContext? _webGpuContext;
-    private volatile bool _stopUpdateThread;
-    private bool _isDisposed;
 
-    public Input Input => _input ?? throw new InvalidOperationException("Input is not initialized until the window has loaded.");
-
-    /// <summary>
-    /// Gets the reference to the main application window.
-    /// </summary>
-    /// <remarks>
-    /// The main window is the first window created and run within the application.
-    /// If no windows have been created or the main window has not been set,
-    /// this property will return <c>null</c>.
-    /// </remarks>
-    /// <returns>
-    /// The main <see cref="Window"/> instance or <c>null</c> if no main window exists.
-    /// </returns>
-    public static Window? MainWindow => _mainWindow;
-
-    /// <summary>
-    /// Gets a read-only collection of all created windows within the application.
-    /// </summary>
-    /// <remarks>
-    /// This property provides access to a list of all window instances currently managed by the application.
-    /// Each window in the collection is created using the <see cref="Create"/> method and added to the list
-    /// automatically when the <see cref="Run"/> method is called for the window.
-    /// </remarks>
-    /// <returns>
-    /// A read-only collection of <see cref="Window"/> instances representing all created windows.
-    /// </returns>
-    public static IReadOnlyList<Window> Windows => _windows.AsReadOnly();
+    public Vector2 Size { get; private set; }
     
-    public BaseScene CurrentScene { get; private set; }
+    public BaseScene? CurrentScene { get; private set; }
 
-    /// <summary>
-    /// Creates a new instance of the <see cref="Window"/> class with the specified creation options.
-    /// </summary>
-    /// <param name="windowCreationOptions">
-    /// An instance of <see cref="WindowCreationOptions"/> specifying the parameters
-    /// for the window such as title, width, and height.
-    /// </param>
-    /// <returns>
-    /// A new <see cref="Window"/> instance initialized with the provided creation options.
-    /// </returns>
     public static Window Create(WindowCreationOptions windowCreationOptions)
     {
-        var options = WindowOptions.Default;
-        options.Size = new Vector2D<int>(windowCreationOptions.Width, windowCreationOptions.Height);
-        options.Title = windowCreationOptions.Title;
-        options.API = GraphicsAPI.None;
-        options.IsVisible = true;
-        options.ShouldSwapAutomatically = false;
-        options.IsContextControlDisabled = true;
+        var glfw = Glfw.GetApi();
+        if (!glfw.Init())
+            throw new InvalidOperationException("Failed to initialize GLFW.");
 
-        return new Window(Silk.NET.Windowing.Window.Create(options), windowCreationOptions.VSync);
-    }
+        glfw.WindowHint(WindowHintClientApi.ClientApi, ClientApi.NoApi);
+        glfw.WindowHint(WindowHintBool.Visible, true);
+        glfw.WindowHint(WindowHintBool.Resizable, false);
 
-    private Window(IWindow nativeWindow, bool vsync)
-    {
-        _nativeWindow = nativeWindow;
-        _vsync = vsync;
-        _nativeWindow.Load += Load;
-        _nativeWindow.Render += Render;
-        _nativeWindow.Update += Update;
-        _nativeWindow.Closing += Closing;
-    }
-
-    /// <summary>
-    /// Runs the window's main event loop, rendering its contents and handling user input.
-    /// </summary>
-    /// <remarks>
-    /// This method initiates the execution of the window. If this is the first window being run,
-    /// it will become the application's main window. Subsequent windows will be executed on separate threads.
-    /// </remarks>
-    public void Run<TScene>() where TScene : BaseScene, new()
-    {
-        CurrentScene = new TScene();
-        _windows.Add(this);
+        var pWindowHandle = glfw.CreateWindow(
+            windowCreationOptions.Width,
+            windowCreationOptions.Height,
+            windowCreationOptions.Title,
+            null,
+            null);
         
-        if (MainWindow == null)
+        glfw.MakeContextCurrent(pWindowHandle);
+        
+        if (windowCreationOptions.VSync)
+            glfw.SwapInterval(1);
+
+        if (pWindowHandle == null)
         {
-            _mainWindow = this;
-            _nativeWindow.Run();
+            glfw.Terminate();
+            throw new InvalidOperationException("Failed to create GLFW window.");
         }
-        else
-            throw new Exception("Cannot run multiple windows.");
+
+        return new Window(glfw, pWindowHandle);
     }
 
-    /// <summary>
-    /// Closes the window and releases all associated resources.
-    /// </summary>
-    public void Close()
+
+    private Window(Glfw glfw, WindowHandle* pWindowHandle) : base(glfw, pWindowHandle) { }
+
+    public void Run<TScene>()
+        where TScene : BaseScene, new()
     {
-        _nativeWindow.Close();
-        _nativeWindow.Dispose();
+        Load<TScene>();
+        
+        while (!_glfw.WindowShouldClose(_pWindowHandle))
+        {
+            Update();
+            Render();
+        }
     }
 
-    private void Load()
+    private void Load<TScene>()
+        where TScene : BaseScene, new()
     {
-        var glfwHandle = _nativeWindow.Native?.Glfw
-            ?? throw new InvalidOperationException("Window backend is not GLFW; cannot initialize Input.");
-        _input = new Input(Glfw.GetApi(), (WindowHandle*)glfwHandle);
-
-        _webGpuContext = WebGPUContext.Create(_nativeWindow, _vsync);
-
+        UpdateWindowInternalStates();
+        
+        _input = new Input(_glfw, _pWindowHandle);
+        _webGpuContext = WebGPUContext.Create(_glfw, this);
+        
         var shaderSource = File.ReadAllText("Assets/Shaders/shader.wgsl");
         _webGpuContext.Setup(shaderSource);
         
+        CurrentScene = new TScene();
         CurrentScene.Start();
     }
 
-    private void Update(double delta)
+    private void Update()
     {
-        _input?.Refresh();
+        UpdateWindowInternalStates();
+        
+        _input.Refresh();
         ComponentCache.Instance.Value.Update();
         ComponentCache.Instance.Value.Update();
         foreach (BaseComponent component in ComponentCache.Instance.Value!.Components)
@@ -153,12 +97,14 @@ public unsafe class Window : IDisposable
         }
     }
 
-    private void Render(double obj)
+    private void Render()
     {
-        DrawCommandBuffer worldBuffer = _webGpuContext!.CreateCommandBuffer();
-        DrawCommandBuffer uiBuffer = _webGpuContext!.CreateCommandBuffer();
+        _glfw.SwapBuffers( _pWindowHandle);
+        
+        DrawCommandBuffer worldBuffer = _webGpuContext.CreateCommandBuffer();
+        DrawCommandBuffer uiBuffer = _webGpuContext.CreateCommandBuffer();
 
-        foreach (BaseComponent component in ComponentCache.Instance.Value!.Components)
+        foreach (BaseComponent component in ComponentCache.Instance.Value.Components)
         {
             component.Render(worldBuffer);
             component.RenderUI(uiBuffer);
@@ -167,18 +113,22 @@ public unsafe class Window : IDisposable
         _webGpuContext.QueueCommandBuffer(worldBuffer, uiBuffer);
     }
 
-    private void Closing()
+    public void Close()
     {
-        CurrentScene.Stop();
-        _stopUpdateThread = true;
+        _glfw.DestroyWindow( _pWindowHandle);
     }
-    
+
+    private void UpdateWindowInternalStates()
+    {
+        _glfw.GetWindowSize(_pWindowHandle, out var width, out var height);
+        Size = new Vector2(width, height);
+    }
+
     public void Dispose()
     {
-        if (!_isDisposed)
-        {
-            _webGpuContext?.Dispose();
-            _nativeWindow.Dispose();
-        }
+        CurrentScene?.Stop();
+        
+        _glfw.Terminate();
+        _glfw.Dispose();
     }
 }

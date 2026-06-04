@@ -1,5 +1,9 @@
 using System.Numerics;
+using System.Runtime.InteropServices;
 using Aphelion.Components;
+using Aphelion.Rendering.WebGPU.MacOS;
+using Silk.NET.Core.Native;
+using Silk.NET.GLFW;
 using Silk.NET.WebGPU;
 using Silk.NET.Windowing;
 using DrawingColor = System.Drawing.Color;
@@ -23,6 +27,167 @@ internal unsafe class WebGPUContext : IDisposable
     internal Device* Device { get; }
     internal Queue* Queue { get; }
     internal TextureFormat SwapChainFormat { get; }
+
+    internal static WebGPUContext Create(Glfw glfw, Window window)
+    {
+        var webGpu = Silk.NET.WebGPU.WebGPU.GetApi();
+
+        Instance* pInstance = webGpu.CreateInstance(null);
+        var pSurface = CreateWebGPUSurface(glfw, window, webGpu, pInstance);
+
+        var requestAdapterOptions = new RequestAdapterOptions
+        {
+            CompatibleSurface = pSurface,
+            PowerPreference = PowerPreference.HighPerformance
+        };
+
+        Adapter* pAdapter;
+        webGpu.InstanceRequestAdapter(pInstance, &requestAdapterOptions, PfnRequestAdapterCallback.From(
+            (status, adapter, message, userData) =>
+            {
+                if (status == RequestAdapterStatus.Success)
+                    *(Adapter**)userData = adapter;
+            }), &pAdapter);
+
+        var deviceDescriptor = new DeviceDescriptor();
+        Device* pDevice;
+        webGpu.AdapterRequestDevice(pAdapter, &deviceDescriptor, PfnRequestDeviceCallback.From(
+            (status, device, message, userData) =>
+            {
+                if (status == RequestDeviceStatus.Success)
+                    *(Device**)userData = device;
+            }), &pDevice);
+
+        var queue = webGpu.DeviceGetQueue(pDevice);
+        var swapChainFormat = webGpu.SurfaceGetPreferredFormat(pSurface, pAdapter);
+
+        var surfaceConfiguration = new SurfaceConfiguration
+        {
+            Device = pDevice,
+            Format = swapChainFormat,
+            Usage = TextureUsage.RenderAttachment,
+            Width = (uint)window.Size.X,
+            Height = (uint)window.Size.Y,
+            PresentMode = PresentMode.Immediate
+        };
+        webGpu.SurfaceConfigure(pSurface, &surfaceConfiguration);
+
+        return new WebGPUContext(webGpu, pInstance, pSurface, pAdapter, pDevice, queue, swapChainFormat, (int)window.Size.X, (int)window.Size.Y);
+    }
+    
+    private static unsafe Surface* CreateWebGPUSurface(Glfw glfw, Window window, Silk.NET.WebGPU.WebGPU wgpu, Instance* instance)
+    {
+        var descriptor = new SurfaceDescriptor();
+        
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Create("BROWSER")))
+        {
+            var htmlDescriptor = new SurfaceDescriptorFromCanvasHTMLSelector
+            {
+                Chain = new ChainedStruct
+                {
+                    Next  = null,
+                    SType = SType.SurfaceDescriptorFromCanvasHtmlSelector
+                },
+                Selector = (byte*) SilkMarshal.StringToPtr("canvas")
+            };
+
+            descriptor.NextInChain = (ChainedStruct*) (&htmlDescriptor); 
+        }
+        else if (window.X11 != null)
+        {
+            var xlibDescriptor = new SurfaceDescriptorFromXlibWindow
+            {
+                Chain = new ChainedStruct
+                {
+                    Next  = null,
+                    SType = SType.SurfaceDescriptorFromXlibWindow
+                },
+                Display = (void*) window.X11.Value.Display,
+                Window  = (uint) window.X11.Value.Window
+            };
+
+            descriptor.NextInChain = (ChainedStruct*) (&xlibDescriptor);
+        }
+        else if (window.Cocoa != null)
+        {
+            var cocoa = window.Cocoa.Value;
+            CAMetalLayer metalLayer = CAMetalLayer.New();
+            NSWindow nsWindow = new(cocoa);
+            var contentView = nsWindow.contentView;
+            contentView.WantsLayer = true;
+            contentView.Layer = metalLayer.NativePtr;
+
+            var cocoaDescriptor = new SurfaceDescriptorFromMetalLayer
+            {
+                Chain = new ChainedStruct
+                {
+                    Next  = null,
+                    SType = SType.SurfaceDescriptorFromMetalLayer
+                },
+                Layer = (void*) metalLayer.NativePtr
+            };
+            
+            descriptor.NextInChain = (ChainedStruct*) (&cocoaDescriptor);
+        }
+        else if (window.Wayland != null)
+        {
+            var waylandDescriptor = new SurfaceDescriptorFromWaylandSurface
+            {
+                Chain = new ChainedStruct
+                {
+                    Next  = null,
+                    SType = SType.SurfaceDescriptorFromWaylandSurface
+                },
+                Display = (void*)window.Wayland.Value.Display,
+                Surface = (void*)window.Wayland.Value.Surface
+            };
+
+            descriptor.NextInChain = (ChainedStruct*) (&waylandDescriptor);
+        }
+        else if (window.Win32 != null)
+        {
+            var win32Descriptor = new SurfaceDescriptorFromWindowsHWND
+            {
+                Chain = new ChainedStruct
+                {
+                    Next  = null,
+                    SType = SType.SurfaceDescriptorFromWindowsHwnd
+                },
+                Hwnd      = (void*)window.Win32.Value.Hwnd,
+                Hinstance = (void*)window.Win32.Value.HInstance
+            };
+
+            descriptor.NextInChain = (ChainedStruct*) (&win32Descriptor);
+        }
+        else if (window.Android != null)
+        {
+            var androidDescriptor = new SurfaceDescriptorFromAndroidNativeWindow
+            {
+                Chain = new ChainedStruct
+                {
+                    Next  = null,
+                    SType = SType.SurfaceDescriptorFromAndroidNativeWindow
+                },
+                Window = (void*)window.Android.Value.Window
+            };
+
+            descriptor.NextInChain = (ChainedStruct*) (&androidDescriptor);
+        }
+        else
+        {
+            throw new PlatformNotSupportedException($"Your platform is not supported!");
+        }
+
+        var surface = wgpu.InstanceCreateSurface(instance, descriptor);
+
+        if (descriptor.NextInChain->SType == SType.SurfaceDescriptorFromCanvasHtmlSelector)
+        {
+            var htmlDescriptor = (SurfaceDescriptorFromCanvasHTMLSelector*) descriptor.NextInChain;
+            SilkMarshal.Free((IntPtr) htmlDescriptor->Selector);
+        }
+        
+        return surface;
+    }
 
     internal static WebGPUContext Create(IWindow window, bool vsync)
     {
