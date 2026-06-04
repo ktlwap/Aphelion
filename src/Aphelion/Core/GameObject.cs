@@ -6,14 +6,16 @@ public sealed class GameObject
 {
     private readonly List<BaseComponent> _components = new();
     public readonly Transform Transform;
+    public readonly Input Input;
 
+    public string Name { get; set; }
+    
     private GameObject(string name)
     {
         Name = name;
         Transform = new Transform(this);
+        Input = Input.Current;
     }
-
-    public string Name { get; set; }
 
     /// <summary>
     /// Provides a read-only collection of components attached to the current GameObject.

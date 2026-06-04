@@ -8,6 +8,8 @@ public abstract class BaseComponent
 
     public required GameObject GameObject { get; init; }
 
+    public Input Input => GameObject.Input;
+
     public virtual void Start() { }
 
     public virtual void Update() { }
