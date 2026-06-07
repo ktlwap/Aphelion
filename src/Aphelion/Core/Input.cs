@@ -185,6 +185,8 @@ public unsafe class Input
 
     internal void Refresh()
     {
+        _mouseWheelDelta = Vector2.Zero;
+        
         _glfw.PollEvents();
         
         foreach (var mouseButtonState in _mouseButtonStates)
