@@ -478,8 +478,8 @@ internal unsafe class WebGPUContext : IDisposable
                             Rotation = texCmd.Rotation,
                             ZIndex = texCmd.ZIndex,
                             Color = texCmd.Color.ToVector4(),
-                            Uv0 = Vector2.Zero,
-                            Uv1 = Vector2.One,
+                            Uv0 = texCmd.UvMin,
+                            Uv1 = texCmd.UvMax,
                             WebGPUTexture = loaded,
                             IsSdf = 0f,
                         });

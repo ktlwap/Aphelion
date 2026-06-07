@@ -18,6 +18,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WorldUiRenderSample", "samp
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ColliderClickSample", "samples\ColliderClickSample\ColliderClickSample.csproj", "{4AE0E0C3-9983-4F88-9CEF-AA90E5E58DC1}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AnimatedSpriteSample", "samples\AnimatedSpriteSample\AnimatedSpriteSample.csproj", "{67EC6FC5-BF28-4F65-BCA3-C6004222168D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -112,6 +114,18 @@ Global
 		{4AE0E0C3-9983-4F88-9CEF-AA90E5E58DC1}.Release|x64.Build.0 = Release|Any CPU
 		{4AE0E0C3-9983-4F88-9CEF-AA90E5E58DC1}.Release|x86.ActiveCfg = Release|Any CPU
 		{4AE0E0C3-9983-4F88-9CEF-AA90E5E58DC1}.Release|x86.Build.0 = Release|Any CPU
+		{67EC6FC5-BF28-4F65-BCA3-C6004222168D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{67EC6FC5-BF28-4F65-BCA3-C6004222168D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{67EC6FC5-BF28-4F65-BCA3-C6004222168D}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{67EC6FC5-BF28-4F65-BCA3-C6004222168D}.Debug|x64.Build.0 = Debug|Any CPU
+		{67EC6FC5-BF28-4F65-BCA3-C6004222168D}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{67EC6FC5-BF28-4F65-BCA3-C6004222168D}.Debug|x86.Build.0 = Debug|Any CPU
+		{67EC6FC5-BF28-4F65-BCA3-C6004222168D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{67EC6FC5-BF28-4F65-BCA3-C6004222168D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{67EC6FC5-BF28-4F65-BCA3-C6004222168D}.Release|x64.ActiveCfg = Release|Any CPU
+		{67EC6FC5-BF28-4F65-BCA3-C6004222168D}.Release|x64.Build.0 = Release|Any CPU
+		{67EC6FC5-BF28-4F65-BCA3-C6004222168D}.Release|x86.ActiveCfg = Release|Any CPU
+		{67EC6FC5-BF28-4F65-BCA3-C6004222168D}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -123,5 +137,6 @@ Global
 		{37ECBB38-8ABD-4889-AECF-10AB9FF54BC3} = {FFA87D8A-37A0-4F25-A201-5F691A11C017}
 		{AE1194D4-8EBC-4604-A3BB-30DB6C9B0B53} = {FFA87D8A-37A0-4F25-A201-5F691A11C017}
 		{4AE0E0C3-9983-4F88-9CEF-AA90E5E58DC1} = {FFA87D8A-37A0-4F25-A201-5F691A11C017}
+		{67EC6FC5-BF28-4F65-BCA3-C6004222168D} = {FFA87D8A-37A0-4F25-A201-5F691A11C017}
 	EndGlobalSection
 EndGlobal

@@ -20,6 +20,8 @@ public sealed class DrawTextureCommand : DrawCommand
 {
     public required Texture Texture { get; init; }
     public required Vector2 Size { get; init; }
+    public Vector2 UvMin { get; init; } = Vector2.Zero;
+    public Vector2 UvMax { get; init; } = Vector2.One;
 }
 
 public sealed class DrawTextCommand : DrawCommand
