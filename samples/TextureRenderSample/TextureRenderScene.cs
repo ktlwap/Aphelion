@@ -19,18 +19,18 @@ internal sealed class TextureRenderScene : BaseScene
         Add("WebGpuTop", WebGpu, new Vector2(720, 160), new Vector2(220, 220), Color.White, 0f);
 
         // Tilted, tinted thumbnails along the middle
-        Add("Mid1", DotNet, new Vector2(120, 380), new Vector2(120, 120), Color.OrangeRed, MathF.PI * -0.15f);
-        Add("Mid2", WebGpu, new Vector2(280, 380), new Vector2(120, 120), Color.LimeGreen, MathF.PI * 0.10f);
-        Add("Mid3", DotNet, new Vector2(440, 380), new Vector2(120, 120), Color.DodgerBlue, MathF.PI * -0.25f);
-        Add("Mid4", WebGpu, new Vector2(600, 380), new Vector2(120, 120), Color.Gold, MathF.PI * 0.20f);
-        Add("Mid5", DotNet, new Vector2(760, 380), new Vector2(120, 120), Color.MediumPurple, MathF.PI * -0.05f);
-        Add("Mid6", WebGpu, new Vector2(920, 380), new Vector2(120, 120), Color.HotPink, MathF.PI * 0.30f);
+        Add("Mid1", DotNet, new Vector2(120, 380), new Vector2(120, 120), Color.OrangeRed, -27f);
+        Add("Mid2", WebGpu, new Vector2(280, 380), new Vector2(120, 120), Color.LimeGreen, 18f);
+        Add("Mid3", DotNet, new Vector2(440, 380), new Vector2(120, 120), Color.DodgerBlue, -45f);
+        Add("Mid4", WebGpu, new Vector2(600, 380), new Vector2(120, 120), Color.Gold, 36f);
+        Add("Mid5", DotNet, new Vector2(760, 380), new Vector2(120, 120), Color.MediumPurple, -9f);
+        Add("Mid6", WebGpu, new Vector2(920, 380), new Vector2(120, 120), Color.HotPink, 54f);
 
         // Two spinners at the bottom: opposite directions, half-transparent
         AddSpinning("SpinnerLeft", DotNet, new Vector2(360, 580), new Vector2(160, 160),
-            Color.FromArgb(180f / 255f, 1f, 1f, 1f), MathF.PI);
+            Color.FromArgb(180f / 255f, 1f, 1f, 1f), 180f);
         AddSpinning("SpinnerRight", WebGpu, new Vector2(640, 580), new Vector2(160, 160),
-            Color.FromArgb(180f / 255f, 200f / 255f, 220f / 255f, 1f), -MathF.PI);
+            Color.FromArgb(180f / 255f, 200f / 255f, 220f / 255f, 1f), -180f);
 
         GameObject.Instantiate("Camera").AddComponent<Camera>();
     }

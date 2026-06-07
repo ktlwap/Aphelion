@@ -32,16 +32,16 @@ internal sealed class WorldUiRenderScene : BaseScene
         }
 
         AddSpinningWorldQuad("Player", new Vector2(500, 350), new Vector2(90, 90),
-            Color.Gold, spinSpeed: MathF.PI * 0.5f, zIndex: 2f);
+            Color.Gold, spinSpeed: 90f, zIndex: 2f);
 
         AddSpinningWorldQuad("EnemyTL", new Vector2(200, 200), new Vector2(60, 60),
-            Color.OrangeRed, -MathF.PI * 0.7f, zIndex: 1f);
+            Color.OrangeRed, -126f, zIndex: 1f);
         AddSpinningWorldQuad("EnemyTR", new Vector2(800, 200), new Vector2(60, 60),
-            Color.LimeGreen, MathF.PI * 0.6f, zIndex: 1f);
+            Color.LimeGreen, 108f, zIndex: 1f);
         AddSpinningWorldQuad("EnemyBL", new Vector2(200, 500), new Vector2(60, 60),
-            Color.DodgerBlue, MathF.PI * 0.4f, zIndex: 1f);
+            Color.DodgerBlue, 72f, zIndex: 1f);
         AddSpinningWorldQuad("EnemyBR", new Vector2(800, 500), new Vector2(60, 60),
-            Color.HotPink, -MathF.PI * 0.5f, zIndex: 1f);
+            Color.HotPink, -90f, zIndex: 1f);
 
         // -------------------------------------------------------------------
         // UI layer — components push into the UI buffer from RenderUI(buffer).

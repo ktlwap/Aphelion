@@ -53,7 +53,7 @@ internal sealed class QuadRenderScene : BaseScene
         spinComp.Color = Color.White;
         spinComp.Size = new Vector2(100, 100);
         spinComp.ZIndex = 1f;
-        spinComp.SpinSpeed = MathF.PI; // half-turn per second
+        spinComp.SpinSpeed = 180f; // half-turn per second
         spinner.Transform.Position = new Vector2(ScreenWidth / 2f, ScreenHeight / 2f);
 
         GameObject.Instantiate("Camera").AddComponent<Camera>();

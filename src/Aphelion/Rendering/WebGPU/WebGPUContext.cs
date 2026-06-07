@@ -501,10 +501,10 @@ internal unsafe class WebGPUContext : IDisposable
             var q = quads[i];
             int globalI = quadOffset + i;
             int vi = globalI * 4;
-            vertices[vi + 0] = new Vertex { Position = new(-0.5f, -0.5f), Uv = new(q.Uv0.X, q.Uv0.Y), InstancePosition = q.Position, Scale = q.Size, Rotation = q.Rotation, ZIndex = q.ZIndex, Color = q.Color, IsSdf = q.IsSdf };
-            vertices[vi + 1] = new Vertex { Position = new( 0.5f, -0.5f), Uv = new(q.Uv1.X, q.Uv0.Y), InstancePosition = q.Position, Scale = q.Size, Rotation = q.Rotation, ZIndex = q.ZIndex, Color = q.Color, IsSdf = q.IsSdf };
-            vertices[vi + 2] = new Vertex { Position = new( 0.5f,  0.5f), Uv = new(q.Uv1.X, q.Uv1.Y), InstancePosition = q.Position, Scale = q.Size, Rotation = q.Rotation, ZIndex = q.ZIndex, Color = q.Color, IsSdf = q.IsSdf };
-            vertices[vi + 3] = new Vertex { Position = new(-0.5f,  0.5f), Uv = new(q.Uv0.X, q.Uv1.Y), InstancePosition = q.Position, Scale = q.Size, Rotation = q.Rotation, ZIndex = q.ZIndex, Color = q.Color, IsSdf = q.IsSdf };
+            vertices[vi + 0] = new Vertex { Position = new(-0.5f, -0.5f), Uv = new(q.Uv0.X, q.Uv0.Y), InstancePosition = q.Position, Scale = q.Size, Rotation = float.DegreesToRadians(q.Rotation), ZIndex = q.ZIndex, Color = q.Color, IsSdf = q.IsSdf };
+            vertices[vi + 1] = new Vertex { Position = new( 0.5f, -0.5f), Uv = new(q.Uv1.X, q.Uv0.Y), InstancePosition = q.Position, Scale = q.Size, Rotation = float.DegreesToRadians(q.Rotation), ZIndex = q.ZIndex, Color = q.Color, IsSdf = q.IsSdf };
+            vertices[vi + 2] = new Vertex { Position = new( 0.5f,  0.5f), Uv = new(q.Uv1.X, q.Uv1.Y), InstancePosition = q.Position, Scale = q.Size, Rotation = float.DegreesToRadians(q.Rotation), ZIndex = q.ZIndex, Color = q.Color, IsSdf = q.IsSdf };
+            vertices[vi + 3] = new Vertex { Position = new(-0.5f,  0.5f), Uv = new(q.Uv0.X, q.Uv1.Y), InstancePosition = q.Position, Scale = q.Size, Rotation = float.DegreesToRadians(q.Rotation), ZIndex = q.ZIndex, Color = q.Color, IsSdf = q.IsSdf };
 
             int ii = globalI * 6;
             var b = (ushort)(globalI * 4);
