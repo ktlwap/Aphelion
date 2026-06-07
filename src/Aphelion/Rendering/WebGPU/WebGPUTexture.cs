@@ -8,13 +8,13 @@ internal unsafe class WebGPUTexture : IDisposable
     private readonly Silk.NET.WebGPU.Texture* _pTexture;
     private readonly TextureView* _pTextureView;
     
-    internal static WebGPUTexture Upload(Silk.NET.WebGPU.WebGPU webGpu, WebGPUContext context, uint width, uint height, byte* pData, uint dataLength)
+    internal static WebGPUTexture Upload(Silk.NET.WebGPU.WebGPU webGpu, WebGPUContext context, uint width, uint height, byte* pData, uint dataLength, TextureFormat format = TextureFormat.Rgba8Unorm)
     {
         var extent = new Extent3D(width, height, 1);
         var descriptor = new TextureDescriptor
         {
             Size = extent,
-            Format = TextureFormat.Rgba8UnormSrgb,
+            Format = format,
             Usage = TextureUsage.TextureBinding | TextureUsage.CopyDst,
             Dimension = TextureDimension.Dimension2D,
             MipLevelCount = 1,
@@ -33,7 +33,7 @@ internal unsafe class WebGPUTexture : IDisposable
 
         var viewDesc = new TextureViewDescriptor
         {
-            Format = TextureFormat.Rgba8UnormSrgb,
+            Format = format,
             Dimension = TextureViewDimension.Dimension2D,
             Aspect = TextureAspect.All,
             MipLevelCount = 1,

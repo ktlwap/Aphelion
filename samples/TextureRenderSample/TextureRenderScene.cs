@@ -1,4 +1,3 @@
-using System.Drawing;
 using System.Numerics;
 using Aphelion.Components;
 using Aphelion.Core;
@@ -29,9 +28,9 @@ internal sealed class TextureRenderScene : BaseScene
 
         // Two spinners at the bottom: opposite directions, half-transparent
         AddSpinning("SpinnerLeft", DotNet, new Vector2(360, 580), new Vector2(160, 160),
-            Color.FromArgb(180, 255, 255, 255), MathF.PI);
+            Color.FromArgb(180f / 255f, 1f, 1f, 1f), MathF.PI);
         AddSpinning("SpinnerRight", WebGpu, new Vector2(640, 580), new Vector2(160, 160),
-            Color.FromArgb(180, 200, 220, 255), -MathF.PI);
+            Color.FromArgb(180f / 255f, 200f / 255f, 220f / 255f, 1f), -MathF.PI);
 
         GameObject.Instantiate("Camera").AddComponent<Camera>();
     }

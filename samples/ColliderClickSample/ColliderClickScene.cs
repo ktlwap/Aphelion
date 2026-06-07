@@ -1,4 +1,3 @@
-using System.Drawing;
 using System.Numerics;
 using Aphelion.Components;
 using Aphelion.Core;
@@ -25,7 +24,7 @@ internal sealed class ColliderClickScene : BaseScene
 
         AddBackground(new Vector2(ScreenWidth / 2f, ScreenHeight / 2f),
             new Vector2(ScreenWidth, ScreenHeight),
-            Color.FromArgb(255, 24, 28, 36));
+            Color.FromArgb(1f, 24f / 255f, 28f / 255f, 36f / 255f));
 
         AddClickableRectangle("Red", new Vector2(220, 200), new Vector2(160, 110), Color.IndianRed);
         AddClickableRectangle("Green", new Vector2(500, 200), new Vector2(180, 160), Color.SeaGreen);

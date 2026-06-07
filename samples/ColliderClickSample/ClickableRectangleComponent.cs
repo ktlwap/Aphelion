@@ -1,4 +1,3 @@
-using System.Drawing;
 using System.Numerics;
 using Aphelion.Components;
 using Aphelion.Core;
@@ -98,10 +97,6 @@ internal sealed class ClickableRectangleComponent : BaseComponent
             b = x;
         }
 
-        return Color.FromArgb(
-            255,
-            (int)((r + m) * 255f),
-            (int)((g + m) * 255f),
-            (int)((b + m) * 255f));
+        return new Color(r + m, g + m, b + m);
     }
 }

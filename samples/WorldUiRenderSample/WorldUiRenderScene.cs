@@ -1,4 +1,3 @@
-using System.Drawing;
 using System.Numerics;
 using Aphelion.Components;
 using Aphelion.Core;
@@ -20,7 +19,7 @@ internal sealed class WorldUiRenderScene : BaseScene
         // -------------------------------------------------------------------
 
         AddWorldQuad("WorldBg", new Vector2(ScreenWidth / 2f, ScreenHeight / 2f),
-            new Vector2(ScreenWidth, ScreenHeight), Color.FromArgb(255, 18, 24, 36), zIndex: -10f);
+            new Vector2(ScreenWidth, ScreenHeight), Color.FromArgb(1f, 18f / 255f, 24f / 255f, 36f / 255f), zIndex: -10f);
 
         for (int x = 0; x < 10; x++)
         for (int y = 0; y < 7; y++)
@@ -28,7 +27,7 @@ internal sealed class WorldUiRenderScene : BaseScene
             AddWorldQuad($"Tile_{x}_{y}",
                 new Vector2(50 + x * 100, 50 + y * 100),
                 new Vector2(88, 88),
-                Color.FromArgb(255, 36, 48, 72),
+                Color.FromArgb(1f, 36f / 255f, 48f / 255f, 72f / 255f),
                 zIndex: -5f);
         }
 
@@ -50,7 +49,7 @@ internal sealed class WorldUiRenderScene : BaseScene
         // -------------------------------------------------------------------
 
         AddHudPanel("TopBar", new Vector2(ScreenWidth / 2f, 30), new Vector2(ScreenWidth, 60),
-            Color.FromArgb(210, 0, 0, 0));
+            Color.FromArgb(210f / 255f, 0f, 0f, 0f));
         AddHudText("Title", new Vector2(20, 18), "Aphelion — World + UI Layers",
             24f, Color.White);
         var fpsGo = GameObject.Instantiate("FpsCounter");
@@ -61,13 +60,13 @@ internal sealed class WorldUiRenderScene : BaseScene
         fpsGo.Transform.Position = new Vector2(ScreenWidth - 180, 18);
 
         AddHudPanel("BottomBar", new Vector2(ScreenWidth / 2f, ScreenHeight - 30),
-            new Vector2(ScreenWidth, 60), Color.FromArgb(210, 0, 0, 0));
+            new Vector2(ScreenWidth, 60), Color.FromArgb(210f / 255f, 0f, 0f, 0f));
         AddHudText("Hint", new Vector2(20, ScreenHeight - 44),
             "Render(buffer) → world layer    RenderUI(buffer) → UI layer", 20f,
             Color.LightGray);
 
         AddHudPanel("Crosshair", new Vector2(ScreenWidth / 2f, ScreenHeight / 2f),
-            new Vector2(10, 10), Color.FromArgb(220, 255, 255, 255), zIndex: 5f);
+            new Vector2(10, 10), Color.FromArgb(220f / 255f, 1f, 1f, 1f), zIndex: 5f);
 
         // -------------------------------------------------------------------
         // Camera — pans and zooms continuously. The world matrix is built as

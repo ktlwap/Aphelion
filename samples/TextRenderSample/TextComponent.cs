@@ -1,4 +1,3 @@
-using System.Drawing;
 using Aphelion.Core;
 using Aphelion.Rendering;
 

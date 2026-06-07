@@ -1,4 +1,3 @@
-using System.Drawing;
 using System.Numerics;
 using Aphelion.Components;
 using Aphelion.Core;
@@ -15,7 +14,7 @@ internal sealed class QuadRenderScene : BaseScene
         // Dark gray background filling the whole window
         var bg = GameObject.Instantiate("Background");
         var bgComp = bg.AddComponent<QuadComponent>();
-        bgComp.Color = Color.FromArgb(255, 30, 30, 30);
+        bgComp.Color = Color.FromArgb(1f, 30f / 255f, 30f / 255f, 30f / 255f);
         bgComp.Size = new Vector2(ScreenWidth, ScreenHeight);
         bgComp.ZIndex = -1f;
         bg.Transform.Position = new Vector2(ScreenWidth / 2f, ScreenHeight / 2f);

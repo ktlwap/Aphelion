@@ -1,4 +1,5 @@
 using Aphelion.Rendering.WebGPU;
+using Silk.NET.WebGPU;
 using StbImageSharp;
 
 namespace Aphelion.Rendering;
@@ -41,7 +42,7 @@ public static class RenderAssetManager
             };
 
             _textures[texture] = WebGPUTexture.Upload(_webGpu, _context, (uint)image.Width, (uint)image.Height, pData,
-                (uint)image.Data.Length);
+                (uint)image.Data.Length, TextureFormat.Rgba8UnormSrgb);
 
             return texture;
         }

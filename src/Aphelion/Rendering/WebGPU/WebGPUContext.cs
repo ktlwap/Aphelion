@@ -6,7 +6,7 @@ using Silk.NET.Core.Native;
 using Silk.NET.GLFW;
 using Silk.NET.WebGPU;
 using Silk.NET.Windowing;
-using DrawingColor = System.Drawing.Color;
+using WgpuColor = Silk.NET.WebGPU.Color;
 
 namespace Aphelion.Rendering.WebGPU;
 
@@ -311,7 +311,7 @@ internal unsafe class WebGPUContext : IDisposable
             View = pTargetView,
             LoadOp = LoadOp.Clear,
             StoreOp = StoreOp.Store,
-            ClearValue = new Color(0, 0, 0, 1)
+            ClearValue = new WgpuColor(0, 0, 0, 1)
         };
 
         var renderPassDesc = new RenderPassDescriptor
@@ -460,7 +460,7 @@ internal unsafe class WebGPUContext : IDisposable
                         Size = shape.Size,
                         Rotation = shape.Rotation,
                         ZIndex = shape.ZIndex,
-                        Color = ToVec4(shape.Color),
+                        Color = shape.Color.ToVector4(),
                         Uv0 = Vector2.Zero,
                         Uv1 = Vector2.One,
                         WebGPUTexture = _defaultTexture!,
@@ -477,7 +477,7 @@ internal unsafe class WebGPUContext : IDisposable
                             Size = texCmd.Size,
                             Rotation = texCmd.Rotation,
                             ZIndex = texCmd.ZIndex,
-                            Color = ToVec4(texCmd.Color),
+                            Color = texCmd.Color.ToVector4(),
                             Uv0 = Vector2.Zero,
                             Uv1 = Vector2.One,
                             WebGPUTexture = loaded,
@@ -539,13 +539,10 @@ internal unsafe class WebGPUContext : IDisposable
         }
     }
 
-    private static Vector4 ToVec4(DrawingColor color) =>
-        new(color.R / 255f, color.G / 255f, color.B / 255f, color.A / 255f);
-
     private static void AppendTextQuads(List<QuadDraw> quads, DrawTextCommand cmd, WebGPUFont font)
     {
         float scale = cmd.FontSize / font.BakedSize;
-        var color = ToVec4(cmd.Color);
+        var color = cmd.Color.ToVector4();
         float cos = MathF.Cos(cmd.Rotation);
         float sin = MathF.Sin(cmd.Rotation);
         float pen = 0f;
